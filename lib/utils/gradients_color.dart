@@ -44,3 +44,10 @@ class GradientColors {
 }
 
 final primaryColor = Colors.white;
+
+final List<Gradient> coloresBackground = [
+  GradientColors.firstColorsGradient,
+  GradientColors.secondColorsGradient,
+  GradientColors.thirdColorsGradient,
+  GradientColors.fourColorsGradient,
+];

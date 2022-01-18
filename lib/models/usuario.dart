@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show Gradient;
+import 'package:flutter/cupertino.dart' show Gradient;
 
 class Usuario {
   String? name;

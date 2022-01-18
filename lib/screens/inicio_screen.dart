@@ -1,7 +1,11 @@
 // ignore_for_file: use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:user_app/models/usuario.dart';
+import 'package:user_app/utils/custom_dialog.dart';
 import 'package:user_app/utils/gradients_color.dart';
+import 'package:user_app/services/usuario_services.dart';
 import 'package:user_app/widgets/custom_background.dart';
 import 'package:user_app/widgets/custom_buttom_gradient.dart';
 
@@ -9,6 +13,7 @@ class InicioScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final profileProvider = context.watch<UsuarioServices>();
     return Scaffold(
       body: CustomBackground(
         child: Column(
@@ -25,31 +30,36 @@ class InicioScreen extends StatelessWidget {
             SizedBox(
               height: 470,
               width: double.infinity,
-              child: GridView.builder(
-                physics: const BouncingScrollPhysics(),
-                shrinkWrap: true,
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 200,
-                  childAspectRatio: 3 / 3,
-                  mainAxisSpacing: 10,
-                ),
-                itemCount: 4,
-                itemBuilder: (_, i) => Container(
-                  alignment: Alignment.topCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Profile(),
-                      const SizedBox(height: 10),
-                      const Text('Fabrizzio',
-                          style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w300)),
-                    ],
-                  ),
-                ),
-              ),
+              child: (profileProvider.profile.isEmpty)
+                  ? const Center(child: Text('No existe Usuario'))
+                  : GridView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      shrinkWrap: true,
+                      gridDelegate:
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 200,
+                        childAspectRatio: 3 / 3,
+                        mainAxisSpacing: 10,
+                      ),
+                      itemCount: profileProvider.profile.length,
+                      itemBuilder: (_, i) => Container(
+                        alignment: Alignment.topCenter,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Profile(profileProvider.profile[i]),
+                            const SizedBox(height: 10),
+                            Text(
+                              profileProvider.profile[i].name!,
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w300),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -62,7 +72,20 @@ class InicioScreen extends StatelessWidget {
                   witdh: 170,
                   color1: Colors.grey.withOpacity(0.6),
                   color2: Colors.grey.withOpacity(0.6),
-                  onPressed: () {},
+                  onPressed: (profileProvider.profile.length == 4)
+                      ? () {
+                          showAlert(context, 'IMPOSIBLE DE AGREGAR UN USUARIO',
+                              'En esta cuenta solo se puede agregar maximo 4 perfiles.');
+                        }
+                      : () {
+                          final newUser = Usuario(
+                            name:
+                                'adulto ${profileProvider.profile.length + 1}',
+                            image: '',
+                            background: profileProvider.colorDefault,
+                          );
+                          profileProvider.guardarProfile(newUser);
+                        },
                 ),
                 const SizedBox(width: 10),
                 MyGradientElevatedButtom(
@@ -72,7 +95,19 @@ class InicioScreen extends StatelessWidget {
                   witdh: 170,
                   color1: Colors.grey.withOpacity(0.6),
                   color2: Colors.grey.withOpacity(0.6),
-                  onPressed: () {},
+                  onPressed: (profileProvider.profile.length == 4)
+                      ? () {
+                          showAlert(context, 'IMPOSIBLE DE AGREGAR UN USUARIO',
+                              'En esta cuenta solo se puede agregar maximo 4 perfiles.');
+                        }
+                      : () {
+                          final newUser = Usuario(
+                            name: 'niño ${profileProvider.profile.length + 1}',
+                            image: '',
+                            background: profileProvider.colorDefault,
+                          );
+                          profileProvider.guardarProfile(newUser);
+                        },
                 ),
               ],
             ),
@@ -96,14 +131,17 @@ class InicioScreen extends StatelessWidget {
 }
 
 class Profile extends StatelessWidget {
+  final Usuario user;
+  const Profile(this.user);
   @override
   Widget build(BuildContext context) {
+    final profileProvider = context.watch<UsuarioServices>().colorDefault;
     return Container(
       height: 150,
       width: 160,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: GradientColors.secondColorsGradient,
+        gradient: profileProvider,
       ),
       alignment: Alignment.center,
       child: Padding(
@@ -114,9 +152,16 @@ class Profile extends StatelessWidget {
             color: Colors.grey.withOpacity(0.2),
           ),
           alignment: Alignment.center,
-          // aca hacer condicion de eso o foto
-          child: const Text('F',
-              style: TextStyle(fontSize: 40, color: Colors.white)),
+          child: (user.image!.isEmpty)
+              ? Text(user.name!.substring(0, 1).toUpperCase(),
+                  style: const TextStyle(fontSize: 40, color: Colors.white))
+              : Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
+                    child: Image.asset(user.image!),
+                  ),
+                ),
         ),
       ),
     );
